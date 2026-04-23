@@ -1,11 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
+from app.routers import auth
 
-# Import routers (on les ajoutera au fur et à mesure)
-# from app.routers import auth, data, reports
-
-# Crée toutes les tables en base de données au démarrage
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -14,7 +11,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Configuration CORS — autorise le frontend React à parler au backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -22,6 +18,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth.router)
 
 
 @app.get("/")
