@@ -150,13 +150,13 @@ docker-compose exec backend pytest tests/ --cov=app --cov-report=term
 
 ## 🗺️ Roadmap
 
-- [x] Project setup & Docker configuration
-- [ ] Backend API (auth + data endpoints)
-- [ ] Frontend dashboard with charts
-- [ ] CSV/Excel upload
-- [ ] Report export (PDF + Word)
-- [ ] CI/CD pipeline
-- [ ] Deploy to cloud (Render / Railway)
+- Project setup & Docker configuration
+- Backend API (auth + data endpoints)
+- Frontend dashboard with charts
+- CSV/Excel upload
+- Report export (PDF + Word)
+- CI/CD pipeline
+- Deploy to cloud (Render / Railway)
 
 ---
 
