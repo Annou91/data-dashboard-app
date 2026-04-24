@@ -4,7 +4,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { dataService } from '../services/api';
+import { dataService, reportService } from '../services/api';
 
 function Dashboard() {
   const [files, setFiles] = useState([]);
@@ -16,6 +16,7 @@ function Dashboard() {
   const [activeChart, setActiveChart] = useState('line');
   const [xAxis, setXAxis] = useState('');
   const [yAxis, setYAxis] = useState('');
+  const [generatingReport, setGeneratingReport] = useState(false);
   const navigate = useNavigate();
 
   const loadFiles = useCallback(async () => {
@@ -53,9 +54,9 @@ function Dashboard() {
       setFileData(data);
       if (data.columns.length > 0) setXAxis(data.columns[0]);
       const firstNumeric = data.columns.find(col =>
-      data.data.length > 0 && typeof data.data[0][col] === 'number'
-    );
-    if (firstNumeric) setYAxis(firstNumeric);
+        data.data.length > 0 && typeof data.data[0][col] === 'number'
+      );
+      if (firstNumeric) setYAxis(firstNumeric);
     } catch (err) {
       console.error('Failed to load file data', err);
     } finally {
@@ -81,6 +82,18 @@ function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
+  };
+
+  const handleGenerateReport = async (format) => {
+    if (!selectedFile) return;
+    setGeneratingReport(true);
+    try {
+      await reportService.generateReport(selectedFile.id, format);
+    } catch (err) {
+      alert('Report generation failed: ' + err.message);
+    } finally {
+      setGeneratingReport(false);
+    }
   };
 
   const numericColumns = fileData?.columns.filter(col =>
@@ -183,8 +196,35 @@ function Dashboard() {
                   {selectedFile.row_count} rows · {selectedFile.column_count} columns · {selectedFile.file_size} KB
                 </p>
               </div>
-              <div style={styles.headerBadge}>
-                {selectedFile.column_count} columns
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  style={{
+                    ...styles.reportBtn,
+                    opacity: generatingReport ? 0.6 : 1,
+                  }}
+                  onClick={() => handleGenerateReport('pdf')}
+                  disabled={generatingReport}
+                  title="Export PDF"
+                >
+                  {generatingReport ? '⏳' : '📄'} PDF
+                </button>
+                <button
+                  style={{
+                    ...styles.reportBtn,
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    color: '#10b981',
+                    opacity: generatingReport ? 0.6 : 1,
+                  }}
+                  onClick={() => handleGenerateReport('word')}
+                  disabled={generatingReport}
+                  title="Export Word"
+                >
+                  {generatingReport ? '⏳' : '📝'} Word
+                </button>
+                <div style={styles.headerBadge}>
+                  {selectedFile.column_count} columns
+                </div>
               </div>
             </div>
 
@@ -404,6 +444,19 @@ const styles = {
   headerTitle: { fontSize: '22px', fontWeight: '700', color: '#e2e8f0' },
   headerMeta: { fontSize: '13px', color: '#475569', marginTop: '4px' },
   headerBadge: { background: 'rgba(108,99,255,0.15)', color: '#6c63ff', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '13px', fontWeight: '500' },
+  reportBtn: {
+    background: 'rgba(108,99,255,0.15)',
+    border: '1px solid rgba(108,99,255,0.3)',
+    color: '#6c63ff',
+    borderRadius: '10px',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
   loading: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
   spinner: { width: '36px', height: '36px', border: '3px solid rgba(108,99,255,0.2)', borderTop: '3px solid #6c63ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' },

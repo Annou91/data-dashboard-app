@@ -65,4 +65,27 @@ export const dataService = {
   },
 };
 
+export const reportService = {
+  generateReport: async (fileId, format = 'pdf') => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `${API_URL}/reports/generate/${fileId}?format=${format}`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!response.ok) throw new Error('Report generation failed');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `report.${format === 'word' ? 'docx' : 'pdf'}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+};
+
 export default api;

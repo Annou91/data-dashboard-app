@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routers import auth, data
+
+# Import des modèles AVANT create_all pour que SQLAlchemy connaisse toutes les tables
+from app.models.user import User
+from app.models.datafile import DataFile
+
+from app.routers import auth, data, reports
 
 Base.metadata.create_all(bind=engine)
 
@@ -21,6 +26,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(data.router)
+app.include_router(reports.router)
 
 
 @app.get("/")
