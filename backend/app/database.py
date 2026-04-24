@@ -16,7 +16,16 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-engine = create_engine(settings.DATABASE_URL)
+# Corrige l'URL pour Render (postgres:// → postgresql://)
+database_url = settings.DATABASE_URL
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(
+    database_url,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
