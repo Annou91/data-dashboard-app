@@ -26,7 +26,8 @@ RUN pip install --no-cache-dir --timeout=120 --retries=5 pandas==2.1.3
 RUN pip install --no-cache-dir --timeout=120 --retries=5 \
     openpyxl==3.1.2 \
     python-docx==1.1.0 \
-    reportlab==4.0.7
+    reportlab==4.0.7 \
+    matplotlib==3.8.2
 
 COPY . .
 
